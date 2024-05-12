@@ -1,31 +1,34 @@
+import PostCard from '@/components/postcard';
 import fs from 'fs';
 import matter from 'gray-matter';
 
 //型定義
-interface PostFrontMatter {
+export interface PostFrontMatter {
   title: string;
   date: string;
+  image : String
 }
 
-interface Post {
+export interface PostProps {
   slug: string;
   frontMatter: PostFrontMatter;
+  content : String
 }
 
 interface HomeProps {
-  posts: Post[];
+  posts: PostProps[];
 }
 
 //サーバーサイドで静的Props取得
 export const getStaticProps = () => {
   const files = fs.readdirSync('posts');
-  const posts = files.map((fileName) => {
+  const posts = files.map((fileName) => { //受け散った配列の各要素に関数を適用する
     const slug = fileName.replace(/\.md$/, ''); // .mdを消す
     const fileContent = fs.readFileSync(`posts/${fileName}`, 'utf-8');
-    const { data } = matter(fileContent);
+    const { data } = matter(fileContent); //yamlファイル先頭を解析してjson形式にする
     return {
-      frontMatter: data, 
-      slug
+      frontMatter: data,  
+      slug,
     }
   });
 
@@ -36,10 +39,14 @@ export const getStaticProps = () => {
   };
 };
 
-//Todo: ここのPropsの渡され方について調べる
 export default function Home( { posts }: HomeProps) {
-  console.log(posts);
   return (
-    <div className='my-8'>コンテンツ</div>
+    <div className='my-8'>
+      <div className="grid grid-cols-3"> 
+        {posts.map((post) => (
+          <PostCard key={post.slug} post={post} /> 
+        ))}
+      </div>
+    </div>
   );
 }

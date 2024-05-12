@@ -1,7 +1,8 @@
 ---
-title: 'Next.jsでmarkdownブログを構築'
-date: '2022-07-13'
-description: 'Next.jsでmarkdownファイルを利用したブログの構築手順を解説しています。'
+title: '下北沢でハンバーガーを食す'
+date: '2024-05-12'
+description: '下北沢でハンバーガーを食べました。とってもおいしかったよ！'
+image: 'shimokita-hamburger.png'
 ---
 
 Next.js を使って Markdown のブログサイトの構築を一から行なっていきます。
