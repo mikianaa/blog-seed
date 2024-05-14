@@ -1,7 +1,8 @@
 import fs from 'fs';
 import matter from 'gray-matter';
 import { PostProps } from '../index'
-import { marked } from 'marked';
+import markdownit from 'markdown-it';
+import Image from 'next/image'
 
 //型定義
 interface StaticProps {
@@ -31,9 +32,18 @@ export async function getStaticPaths() {
 
 const Post = ({frontMatter, content} : PostProps)  => {
     return (
-        <div>
-            <h1>{frontMatter.title}</h1>
-            <div dangerouslySetInnerHTML={{ __html : marked(content.toString()) }}></div>
+        <div className="prose prose-lg max-w-none">
+            <div className="border">
+                <Image 
+                    src={`/${frontMatter.image}`} 
+                    width={1200} 
+                    height={700} 
+                    alt={frontMatter.title}
+                />
+            </div>
+            <h1 className="mt-12">{frontMatter.title}</h1>
+            <div dangerouslySetInnerHTML={{ __html : markdownit().render(content.toString()) }}></div>
+            {/* contentの内容をHTMLにレンダリングして、HTMLに挿入 */}
         </div>
     );
 };
