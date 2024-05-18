@@ -22,7 +22,7 @@ interface HomeProps {
 //サーバーサイドで静的Props取得
 export const getStaticProps = () => {
   const files = fs.readdirSync('posts');
-  const posts = files.map((fileName) => { //受け散った配列の各要素に関数を適用する
+  let posts = files.map((fileName) => { //受け散った配列の各要素に関数を適用する
     const slug = fileName.replace(/\.md$/, ''); // .mdを消す
     const fileContent = fs.readFileSync(`posts/${fileName}`, 'utf-8');
     const { data } = matter(fileContent); //yamlファイル先頭を解析してjson形式にする
@@ -33,12 +33,13 @@ export const getStaticProps = () => {
   });
 
   //日付が新しい順にソート
-  const sortedPosts = posts.sort((postA, postB) => 
+  posts = posts.sort((postA, postB) => 
     new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date) ? -1 : 1);
+
 
   return {
     props: {
-      sortedPosts,
+      posts,
     },
   };
 };

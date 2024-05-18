@@ -3,6 +3,12 @@ import matter from 'gray-matter';
 import { PostProps } from '../index'
 import markdownit from 'markdown-it';
 import Image from 'next/image'
+import { unified } from 'unified'
+import remarkToc from 'remark-toc';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify'
 
 //型定義
 interface StaticProps {
@@ -13,6 +19,18 @@ interface StaticProps {
 export async function getStaticProps({ params } : StaticProps ) {
     const file = fs.readFileSync(`posts/${params.slug}.md`, 'utf-8');
     const {data, content} = matter(file);
+
+    //目次表示
+    const result = await unified()
+    .use(remarkParse)
+    .use(remarkToc, {
+        heading: '目次'
+    })
+    .use(remarkRehype)
+    .use(rehypeRaw)
+    .use(rehypeStringify)
+    .process(content);
+
     return { props : { frontMatter : data, content}};
 }
 
