@@ -6,16 +6,17 @@ import matter from 'gray-matter';
 export interface PostFrontMatter {
   title: string;
   date: string;
-  image : String
+  image : string;
+  categories : string[];
 }
 
 export interface PostProps {
   slug: string;
   frontMatter: PostFrontMatter;
-  content : String
+  content : string;
 }
 
-interface HomeProps {
+export interface HomeProps {
   posts: PostProps[];
 }
 

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import matter from 'gray-matter';
 import { PostProps } from '../index'
-import markdownit from 'markdown-it';
 import Image from 'next/image'
 import { unified } from 'unified'
 import remarkToc from 'remark-toc';
@@ -9,19 +8,25 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeRaw from 'rehype-raw';
 import rehypeStringify from 'rehype-stringify'
+import * as prod from 'react/jsx-runtime'
+import rehypeParse from 'rehype-parse';
+import rehypeReact from 'rehype-react';
+import { createElement, Fragment, useEffect, useState } from 'react';
+import Link from 'next/link';
 
 //型定義
-interface StaticProps {
-    params : {slug : string}
+export interface StaticProps {
+    params : {slug : string, category: string}
 }
 
 //静的プロパティ取得
 export async function getStaticProps({ params } : StaticProps ) {
     const file = fs.readFileSync(`posts/${params.slug}.md`, 'utf-8');
-    const {data, content} = matter(file);
+    let {data, content} = matter(file);
 
-    //目次表示
-    const result = await unified()
+    // markdownをHTML変換　Parse(解析)→Toc(目次生成)→Rehype(変換)→Stringfy(文字列化)
+    // Todo? remarkReactを使ったLink, Imageの設定(2.12)
+    const indexedContent = await unified()
     .use(remarkParse)
     .use(remarkToc, {
         heading: '目次'
@@ -30,6 +35,8 @@ export async function getStaticProps({ params } : StaticProps ) {
     .use(rehypeRaw)
     .use(rehypeStringify)
     .process(content);
+
+    content = indexedContent.toString();
 
     return { props : { frontMatter : data, content}};
 }
@@ -60,8 +67,16 @@ const Post = ({frontMatter, content} : PostProps)  => {
                 />
             </div>
             <h1 className="mt-12">{frontMatter.title}</h1>
-            <div dangerouslySetInnerHTML={{ __html : markdownit().render(content.toString()) }}></div>
-            {/* contentの内容をHTMLにレンダリングして、HTMLに挿入 */}
+            <span>{frontMatter.date}</span>
+            <div dangerouslySetInnerHTML={{ __html: content }}></div>
+            <div className="space-x-2">
+                {frontMatter.categories.map((category) => (
+                    <span key={category}>
+                        <Link href={`/categories/${category}`}>
+                        </Link>
+                    </span>
+                ))}
+            </div>
         </div>
     );
 };
