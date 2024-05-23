@@ -39,3 +39,17 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Todo　画像の大きさ調整 */
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 200px; /* 固定高さを設定 */
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

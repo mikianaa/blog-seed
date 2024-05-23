@@ -68,15 +68,16 @@ const Post = ({frontMatter, content} : PostProps)  => {
             </div>
             <h1 className="mt-12">{frontMatter.title}</h1>
             <span>{frontMatter.date}</span>
-            <div dangerouslySetInnerHTML={{ __html: content }}></div>
             <div className="space-x-2">
                 {frontMatter.categories.map((category) => (
                     <span key={category}>
                         <Link href={`/categories/${category}`}>
+                            <div>{category}</div>
                         </Link>
                     </span>
                 ))}
             </div>
+            <div dangerouslySetInnerHTML={{ __html: content }}></div>
         </div>
     );
 };

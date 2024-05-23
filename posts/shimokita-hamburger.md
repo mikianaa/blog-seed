@@ -3,6 +3,7 @@ title: '下北沢でハンバーガーを食す'
 date: '2024-05-12'
 description: '下北沢でハンバーガーを食べました。とってもおいしかったよ！'
 image: 'shimokita-hamburger.png'
+categories: ['diary']
 ---
 
 下北沢で服を買いに行こうとしたけれど、結局、買えずに飯だけ食った話
