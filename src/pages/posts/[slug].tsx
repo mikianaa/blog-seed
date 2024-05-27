@@ -11,13 +11,42 @@ import rehypeStringify from 'rehype-stringify'
 import * as prod from 'react/jsx-runtime'
 import rehypeParse from 'rehype-parse';
 import rehypeReact from 'rehype-react';
-import { createElement, Fragment, useEffect, useState } from 'react';
+import { createElement, FC, Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { toc } from 'mdast-util-toc';
+import type {Node, Literal, Parent} from 'unist';
+import *  as tocbot from 'tocbot'
+// import classes from "../../styles/TableOfContents.module.scss";
 
 //型定義
 export interface StaticProps {
-    params : {slug : string, category: string}
+    params : {slug : string, category: string, page:number}
 }
+
+//目次生成
+const TableOfContents: FC = () => {
+  useEffect(() => {
+    tocbot.init({
+        // Where to render the table of contents.
+        tocSelector: '.js-toc',
+        // Where to grab the headings to build the table of contents.
+        contentSelector: '.js-toc-content',
+        // Which headings to grab inside of the contentSelector element.
+        headingSelector: 'h1, h2, h3',
+        // For headings inside relative or absolute positioned containers within content.
+        hasInnerContainers: true,
+      });
+
+    return () => tocbot.destroy();
+  }, []);
+
+  return (
+    <nav>
+      <h2>Table of Contents</h2>
+      <div className="toc" />
+    </nav>
+  );
+};
 
 //静的プロパティ取得
 export async function getStaticProps({ params } : StaticProps ) {
@@ -78,6 +107,9 @@ const Post = ({frontMatter, content} : PostProps)  => {
                 ))}
             </div>
             <div dangerouslySetInnerHTML={{ __html: content }}></div>
+            <div>
+                {/* Todo:目次サイドバー表示 <TableOfContents/> */}
+            </div>
         </div>
     );
 };

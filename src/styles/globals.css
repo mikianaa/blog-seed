@@ -41,14 +41,15 @@ body {
 }
 
 /* Todo　画像の大きさ調整 */
-.image-container {
+.postcard-image-container {
   position: relative;
   width: 100%;
   height: 200px; /* 固定高さを設定 */
   overflow: hidden;
+  border: 0.5px double #000;
 }
 
-.image-container img {
+.postcard-image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
