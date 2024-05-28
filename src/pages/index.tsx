@@ -1,3 +1,4 @@
+import Pagination from '@/components/pagination';
 import PostCard from '@/components/postcard';
 import fs from 'fs';
 import matter from 'gray-matter';
@@ -17,8 +18,15 @@ export interface PostProps {
 }
 
 export interface HomeProps {
-  posts: PostProps[];
+  posts: PostProps[],
+  pages: number[],
+  current_page : number
 }
+
+//ページ分割用の定数と配列
+const PAGE_SIZE = 1;
+const range = (start : number, end : number, length = end - start + 1) => 
+  Array.from({ length }, (_, i) => start + i)
 
 //サーバーサイドで静的Props取得
 export const getStaticProps = () => {
@@ -37,15 +45,17 @@ export const getStaticProps = () => {
   posts = posts.sort((postA, postB) => 
     new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date) ? -1 : 1);
 
+  const pages = range(1, Math.ceil(posts.length / PAGE_SIZE));
 
   return {
     props: {
-      posts,
+      posts : posts.slice(0, PAGE_SIZE),
+      pages,
     },
   };
 };
 
-export default function Home( { posts }: HomeProps) {
+export default function Home( { posts, pages, current_page }: HomeProps) {
   return (
     <div className='my-8'>
       <div className="grid grid-cols-3 gap-4"> 
@@ -53,6 +63,7 @@ export default function Home( { posts }: HomeProps) {
           <PostCard key={post.slug} post={post} /> 
         ))}
       </div>
+      <Pagination pages={pages} current_page={current_page}/>
     </div>
   );
 }
