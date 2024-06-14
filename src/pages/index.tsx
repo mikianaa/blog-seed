@@ -24,7 +24,7 @@ export interface HomeProps {
 }
 
 //ページ分割用の定数と配列
-const PAGE_SIZE = 1;
+const PAGE_SIZE = 6;
 const range = (start : number, end : number, length = end - start + 1) => 
   Array.from({ length }, (_, i) => start + i)
 

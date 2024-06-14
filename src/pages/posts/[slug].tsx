@@ -1,80 +1,77 @@
 import fs from 'fs';
-import matter from 'gray-matter';
-import { PostProps } from '../index'
-import Image from 'next/image'
-import { unified } from 'unified'
-import remarkToc from 'remark-toc';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeRaw from 'rehype-raw';
-import rehypeStringify from 'rehype-stringify'
-import * as prod from 'react/jsx-runtime'
-import rehypeParse from 'rehype-parse';
-import rehypeReact from 'rehype-react';
-import { createElement, FC, Fragment, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { toc } from 'mdast-util-toc';
-import type {Node, Literal, Parent} from 'unist';
-import *  as tocbot from 'tocbot'
-// import classes from "../../styles/TableOfContents.module.scss";
+import markdownToHtml from 'zenn-markdown-html';
+import matter from 'gray-matter';
+import { JSDOM } from "jsdom";
+import Xfeed from '../../components/xfeed';
 
 //型定義
 export interface StaticProps {
-    params : {slug : string, category: string, page:number}
+    params: { slug: string, category: string, page: number }
 }
 
-//目次生成
-const TableOfContents: FC = () => {
-  useEffect(() => {
-    tocbot.init({
-        // Where to render the table of contents.
-        tocSelector: '.js-toc',
-        // Where to grab the headings to build the table of contents.
-        contentSelector: '.js-toc-content',
-        // Which headings to grab inside of the contentSelector element.
-        headingSelector: 'h1, h2, h3',
-        // For headings inside relative or absolute positioned containers within content.
-        hasInnerContainers: true,
-      });
+type PostData = {
+    id: string,
+    title: string,
+    categories: string[],
+    published_at: string,
+    thumbnail: string,
+    blogContentHtml: string,
+    tableOfContents: TableOfContent[]
+}
 
-    return () => tocbot.destroy();
-  }, []);
+type TableOfContent = {
+    level: string,
+    title: string,
+    href: string,
+}
 
-  return (
-    <nav>
-      <h2>Table of Contents</h2>
-      <div className="toc" />
-    </nav>
-  );
-};
+//h1タグ、h2タグをHTMLから抽出
+function extractHeadings(html: string): TableOfContent[] {
 
-//静的プロパティ取得
-export async function getStaticProps({ params } : StaticProps ) {
-    const file = fs.readFileSync(`posts/${params.slug}.md`, 'utf-8');
-    let {data, content} = matter(file);
+    const domHtml = new JSDOM(html).window.document;
 
-    // markdownをHTML変換　Parse(解析)→Toc(目次生成)→Rehype(変換)→Stringfy(文字列化)
-    // Todo? remarkReactを使ったLink, Imageの設定(2.12)
-    const indexedContent = await unified()
-    .use(remarkParse)
-    .use(remarkToc, {
-        heading: '目次'
-    })
-    .use(remarkRehype)
-    .use(rehypeRaw)
-    .use(rehypeStringify)
-    .process(content);
+    // DOMから目次を検索し、{hタグレベル、タイトル名、リンク先}、を取得する
+    const elements = domHtml.querySelectorAll<HTMLElement>("h1, h2");
+    const tableOfContents: TableOfContent[] = [];
+    elements.forEach((element) => {
+        const level = element.tagName;
+        const title = element.innerHTML.split("</a> ")[1];
+        const href = `#${title.toLowerCase().replace(/\s+/g, '-')}`;
+        const record = { level: level, title: title, href: href };
+        tableOfContents.push(record);
+    });
 
-    content = indexedContent.toString();
+    return tableOfContents;
+}
 
-    return { props : { frontMatter : data, content}};
+
+//静的Props取得
+export async function getStaticProps({ params }: StaticProps) {
+    const mdFile = fs.readFileSync(`posts/${params.slug}.md`, 'utf-8');
+
+    const { data: frontMatter, content } = matter(mdFile);
+
+    //frontMatterの情報を取得
+    const title = frontMatter.title;
+    const categories = frontMatter.categories;
+    const published_at = frontMatter.date;
+    const thumbnail = frontMatter.image;
+
+    //本文の内容と目次の情報を取得
+    const blogContentHtml = markdownToHtml(content);
+    const tableOfContents = extractHeadings(blogContentHtml);
+
+
+    return { props: { title, categories, published_at, thumbnail, blogContentHtml, tableOfContents } };
 }
 
 //静的パスをmdファイルから取得
 export async function getStaticPaths() {
     const files = fs.readdirSync('posts');
     const paths = files.map((fileName) => ({
-        params : {
+        params: {
             slug: fileName.replace(/\.md$/, ''),
         }
     }));
@@ -84,31 +81,66 @@ export async function getStaticPaths() {
     };
 }
 
-const Post = ({frontMatter, content} : PostProps)  => {
+const Post = ({ title, categories, published_at, thumbnail, blogContentHtml, tableOfContents }: PostData) => {
     return (
-        <div className="prose prose-lg max-w-none">
-            <div className="border">
-                <Image 
-                    src={`/${frontMatter.image}`} 
-                    width={1200} 
-                    height={700} 
-                    alt={frontMatter.title}
-                />
-            </div>
-            <h1 className="mt-12">{frontMatter.title}</h1>
-            <span>{frontMatter.date}</span>
-            <div className="space-x-2">
-                {frontMatter.categories.map((category) => (
-                    <span key={category}>
-                        <Link href={`/categories/${category}`}>
-                            <div>{category}</div>
-                        </Link>
-                    </span>
-                ))}
-            </div>
-            <div dangerouslySetInnerHTML={{ __html: content }}></div>
-            <div>
-                {/* Todo:目次サイドバー表示 <TableOfContents/> */}
+        <div className="flex">
+            <div className="post-content flex-3 p-5 prose prose-lg max-w-none">
+                <div className="prose prose-lg max-w-none">
+                    <div className="border">
+                        <Image
+                            src={`/${thumbnail}`}
+                            width={1200}
+                            height={700}
+                            alt={title}
+                        />
+                    </div>
+                    <h1 className="mt-12">{title}</h1>
+                    <span>{published_at}</span>
+                    <div className="space-x-2">
+                        {categories.map((category) => (
+                            <span key={category}>
+                                <Link href={`/categories/${category}`}>
+                                    <div>{category}</div>
+                                </Link>
+                            </span>
+                        ))}
+                    </div>
+                    <div dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
+
+                    {/* 目次→Todo:動的に遷移させる */}
+                    <aside className="toc-sidebar flex-1 sticky top-5 p-5 border-l border-gray-300">
+                        <div>
+                            <div className="hidden md:block w-72 ml-3">
+                                <div className="flex flex-col sticky top-6">
+                                    <div className="p-4 shadow-md rounded-xl mb-6 bg-white ">
+                                        <p className="text-xl text-bold mb-4">目次</p>
+                                        <ul className="list-none p-0">
+                                            {tableOfContents.map((anchor: TableOfContent) => {
+                                                if (anchor.level === "H1") {
+                                                    return (
+                                                        <li className="mb-2" key={anchor.href}>
+                                                            <a href={anchor.href}>{anchor.title}</a>
+                                                        </li>
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <li className="ml-4 mb-2" key={anchor.href}>
+                                                            <a href={anchor.href}>{anchor.title}</a>
+                                                        </li>
+                                                    );
+                                                }
+                                            })}
+                                        </ul>
+                                    </div>
+                                    <div className="p-4 shadow-md rounded-xl bg-white">
+                                        <Xfeed />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </aside>
+                </div>
             </div>
         </div>
     );
