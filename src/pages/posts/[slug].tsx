@@ -5,6 +5,7 @@ import markdownToHtml from 'zenn-markdown-html';
 import matter from 'gray-matter';
 import { JSDOM } from "jsdom";
 import Xfeed from '../../components/xfeed';
+import '../../styles/posts.css';
 
 //型定義
 export interface StaticProps {
@@ -84,32 +85,19 @@ export async function getStaticPaths() {
 const Post = ({ title, categories, published_at, thumbnail, blogContentHtml, tableOfContents }: PostData) => {
     return (
         <div className="flex">
-            <div className="post-content flex-3 p-5 prose prose-lg max-w-none">
+            <div className="flex-3 p-4 shadow-md rounded-xl mb-6 bg-white ">
                 <div className="prose prose-lg max-w-none">
-                    <div className="border">
-                        <Image
+                    <div>
+                        <Image className = "thumbnail-img"
                             src={`/${thumbnail}`}
-                            width={1200}
-                            height={700}
+                            width={500}
+                            height={300}
                             alt={title}
                         />
                     </div>
-                    <h1 className="mt-12">{title}</h1>
-                    <span>{published_at}</span>
-                    <div className="space-x-2">
-                        {categories.map((category) => (
-                            <span key={category}>
-                                <Link href={`/categories/${category}`}>
-                                    <div>{category}</div>
-                                </Link>
-                            </span>
-                        ))}
-                    </div>
-                    <div dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
-
                     {/* 目次→Todo:動的に遷移させる */}
                     <aside className="toc-sidebar flex-1 sticky top-5 p-5 border-l border-gray-300">
-                        <div>
+                        <div className="side-bar">
                             <div className="hidden md:block w-72 ml-3">
                                 <div className="flex flex-col sticky top-6">
                                     <div className="p-4 shadow-md rounded-xl mb-6 bg-white ">
@@ -140,6 +128,18 @@ const Post = ({ title, categories, published_at, thumbnail, blogContentHtml, tab
                         </div>
 
                     </aside>
+                    <h1 className="mt-12">{title}</h1>
+                    <span>{published_at}</span>
+                    <div className="space-x-2">
+                        {categories.map((category) => (
+                            <span key={category}>
+                                <Link href={`/categories/${category}`}>
+                                    <div>{category}</div>
+                                </Link>
+                            </span>
+                        ))}
+                    </div>
+                    <div className="content-html" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
                 </div>
             </div>
         </div>

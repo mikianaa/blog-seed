@@ -15,6 +15,7 @@ categories: ['diary']
 私が髪を切った場所をご紹介します。
 
 # 髪
+短めに切りました。
 
 ## 後ろ
 
@@ -22,4 +23,7 @@ categories: ['diary']
 
 ![後ろからみた図](http://localhost:3000/my-new-hair-back.png)
 
-[Reactの入門動画](https://www.youtube.com/playlist?list=PL4cUxeGkcC9gZD-Tvwfod2gaISzfRiP9d)
+# 美容院
+髪を切った美容院はこちらです。
+
+[URL](https://role-hair.com/)

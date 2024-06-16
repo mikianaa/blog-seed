@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.content-html h1 {
+    padding-bottom: .2em;
+    font-size: 1.7em;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid #343434;
+}
+
+.content-html h2 {
+    padding-bottom: .1em;
+    font-size: 1.3em;
+    margin-bottom: 0.5rem;
+}
+
+.content-html a {
+    color: #0f83fd;
+}
+
+.content-html img {
+    width: 50%;
+    height: auto;
+}
+
+.side-bar {
+    width:10px;
+    float:right;
+    margin-left:80px;
+}
