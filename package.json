@@ -9,6 +9,7 @@
   "dependencies": {
     "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.19",
+    "formidable": "^3.5.1",
     "gray-matter": "^4.0.3",
     "jdom": "^3.2.5",
     "jsdom": "^24.1.0",
@@ -24,6 +25,7 @@
     "zenn-markdown-html": "^0.1.154"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^20.14.2",
     "@types/react": "18.3.3",
