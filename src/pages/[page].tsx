@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import Pagination from '../components/pagination';
 import PostCard from '../components/postcard';
 import { PostProps } from '.';
+import Link from 'next/link';
 
 type PageProps = {
   posts: PostProps[];
@@ -68,6 +69,9 @@ export async function getStaticPaths() {
 const Page = ({ posts, pages, current_page }: PageProps) => {
   return (
     <div className="my-8">
+        <Link href="/new-post">
+          <div className="bg-blue-500 text-white px-4 py-2 rounded">New Post</div>
+        </Link>
       <div className="grid grid-cols-3 gap-4">
         {posts.map((post) => (
           <PostCard key={post.slug} post={post} />
