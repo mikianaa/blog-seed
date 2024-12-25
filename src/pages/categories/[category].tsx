@@ -1,16 +1,15 @@
-import fs from 'fs';
-import matter from 'gray-matter';
-import PostCard from '../../components/postcard';
-import { StaticProps } from '../posts/[slug]';
-import { HomeProps, PostProps } from '../index';
-
+import fs from "fs";
+import matter from "gray-matter";
+import PostCard from "../../components/postcard";
+import { StaticProps } from "../posts/[slug]";
+import { HomeProps, PostProps } from "../index";
 
 //静的Property取得(SSG)
-export const getStaticProps = ({ params } : StaticProps) => {
-  const files = fs.readdirSync('posts');
+export const getStaticProps = ({ params }: StaticProps) => {
+  const files = fs.readdirSync("posts");
   const posts = files.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, '');
-    const fileContent = fs.readFileSync(`posts/${fileName}`, 'utf-8');
+    const slug = fileName.replace(/\.md$/, "");
+    const fileContent = fs.readFileSync(`posts/${fileName}`, "utf-8");
     const { data } = matter(fileContent);
     return {
       frontMatter: data,
@@ -25,7 +24,9 @@ export const getStaticProps = ({ params } : StaticProps) => {
   });
 
   const sortedPosts = filteredPosts.sort((postA, postB) =>
-    new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date) ? -1 : 1
+    new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date)
+      ? -1
+      : 1,
   );
 
   return {
@@ -37,9 +38,8 @@ export const getStaticProps = ({ params } : StaticProps) => {
 
 //静的path取得
 export const getStaticPaths = () => {
-
   //規定のカテゴリー値をパスとする
-  const categories = ['diary', 'math'];
+  const categories = ["diary", "math"];
   const paths = categories.map((category) => ({ params: { category } }));
 
   return {
@@ -48,7 +48,7 @@ export const getStaticPaths = () => {
   };
 };
 
-const Category = ({ posts } : HomeProps) => {
+const Category = ({ posts }: HomeProps) => {
   return (
     <div className="my-8">
       <div className="grid grid-cols-3 gap-4">

@@ -1,9 +1,9 @@
-import Header from './header';
-import Footer from './footer';
-import { ReactNode } from 'react';
+import Header from "./header";
+import Footer from "./footer";
+import { ReactNode } from "react";
 
 interface LayoutProps {
-  children : ReactNode;
+  children: ReactNode;
 }
 
 export default function layout({ children }: LayoutProps) {

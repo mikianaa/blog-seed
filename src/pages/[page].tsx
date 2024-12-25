@@ -1,10 +1,10 @@
-import fs from 'fs';
-import { StaticProps } from './posts/[slug]';
-import matter from 'gray-matter';
-import Pagination from '../components/pagination';
-import PostCard from '../components/postcard';
-import { PostProps } from '.';
-import Link from 'next/link';
+import fs from "fs";
+import { StaticProps } from "./posts/[slug]";
+import matter from "gray-matter";
+import Pagination from "../components/pagination";
+import PostCard from "../components/postcard";
+import { PostProps } from ".";
+import Link from "next/link";
 
 type PageProps = {
   posts: PostProps[];
@@ -21,10 +21,10 @@ const range = (start: number, end: number, length = end - start + 1) =>
 //静的Property取得(SSG)
 export const getStaticProps = ({ params }: StaticProps) => {
   const current_page = params.page;
-  const files = fs.readdirSync('posts');
+  const files = fs.readdirSync("posts");
   const posts = files.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, '');
-    const fileContent = fs.readFileSync(`posts/${fileName}`, 'utf-8');
+    const slug = fileName.replace(/\.md$/, "");
+    const fileContent = fs.readFileSync(`posts/${fileName}`, "utf-8");
     const { data } = matter(fileContent);
     return {
       frontMatter: data,
@@ -36,12 +36,14 @@ export const getStaticProps = ({ params }: StaticProps) => {
   const pages = range(1, Math.ceil(posts.length / PAGE_SIZE));
 
   const sortedPosts = posts.sort((postA, postB) =>
-    new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date) ? -1 : 1
+    new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date)
+      ? -1
+      : 1,
   );
 
   const slicedPosts = sortedPosts.slice(
     PAGE_SIZE * (current_page - 1),
-    PAGE_SIZE * current_page
+    PAGE_SIZE * current_page,
   );
   return {
     props: {
@@ -53,7 +55,7 @@ export const getStaticProps = ({ params }: StaticProps) => {
 };
 
 export async function getStaticPaths() {
-  const files = fs.readdirSync('posts');
+  const files = fs.readdirSync("posts");
   const count = files.length;
 
   const paths = range(1, Math.ceil(count / PAGE_SIZE)).map((i) => ({
@@ -69,9 +71,6 @@ export async function getStaticPaths() {
 const Page = ({ posts, pages, current_page }: PageProps) => {
   return (
     <div className="my-8">
-        <Link href="/new-post">
-          <div className="bg-blue-500 text-white px-4 py-2 rounded">New Post</div>
-        </Link>
       <div className="grid grid-cols-3 gap-4">
         {posts.map((post) => (
           <PostCard key={post.slug} post={post} />
