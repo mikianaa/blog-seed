@@ -2,7 +2,6 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/router";
 import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
-import deleteDraft from "./api/delete-draft";
 
 // Draftタイプの定義
 type Draft = {
@@ -30,7 +29,7 @@ const NewPost = () => {
         throw new Error("Failed to fetch drafts");
       }
       const data = await response.json();
-      setDrafts(data.drafts); // APIのレスポンスから下書きをセット
+      setDrafts(data.drafts);
     } catch (error) {
       console.error("Error fetching drafts:", error);
     }
@@ -185,25 +184,26 @@ ${content}`;
       <div className="w-1/3 pl-4">
         <div className="bg-white p-6 rounded shadow">
           <h2 className="text-xl font-bold mb-4">Draft</h2>
-          <div className="space-y-4">
-            {drafts.map((draft, index) => (
-              <div
-                key={index}
-                className="border p-4 flex items-center cursor-pointer hover:bg-gray-100"
-                onClick={() => handleDraftSelect(draft)}
-              >
-                <img
-                  src={draft.image}
-                  alt={draft.title}
-                  className="w-16 h-16 mr-4"
-                />
-                <div>
-                  <h3 className="text-lg font-semibold">{draft.title}</h3>
-                  <p className="text-sm text-gray-600">{draft.category}</p>
+          {drafts.length === 0 ? (<p className="text-gray-500">下書きがありません</p>) : (
+            <div className="space-y-4">
+              {drafts.map((draft, index) => (
+                <div
+                  key={index}
+                  className="border p-4 flex items-center cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleDraftSelect(draft)}
+                >
+                  <img
+                    src={draft.image}
+                    alt={draft.title}
+                    className="w-16 h-16 mr-4"
+                  />
+                  <div>
+                    <h3 className="text-lg font-semibold">{draft.title}</h3>
+                    <p className="text-sm text-gray-600">{draft.category}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>)}
         </div>
       </div>
     </div>

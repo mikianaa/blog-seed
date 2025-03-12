@@ -7,7 +7,6 @@ import { JSDOM } from "jsdom";
 import Xfeed from "../../components/xfeed";
 import "../../styles/posts.css";
 
-//型定義
 export interface StaticProps {
   params: { slug: string; category: string; page: number };
 }
@@ -97,53 +96,23 @@ const Post = ({
   tableOfContents,
 }: PostData) => {
   return (
-    <div className="flex">
-      <div className="flex-3 p-4 shadow-md rounded-xl mb-6 bg-white ">
-        <div className="prose prose-lg max-w-none">
-          <div>
+    <div className="flex justify-center mt-10">
+      <div className="flex w-full px-4 gap-6">
+        {/* 本文エリア */}
+        <div className="flex-1 bg-white shadow-md rounded-xl p-6">
+          <h1 className="text-5xl text-center mb-6">{title}</h1>
+          <div className="text-center mb-6">
             <Image
-              className="thumbnail-img"
+              className="block mx-auto rounded"
               src={`/${thumbnail}`}
               width={500}
               height={300}
               alt={title}
             />
           </div>
-          {/* 目次→Todo:動的に遷移させる */}
-          <aside className="toc-sidebar flex-1 sticky top-5 p-5 border-l border-gray-300">
-            <div className="side-bar">
-              <div className="hidden md:block w-72 ml-3">
-                <div className="flex flex-col sticky top-6">
-                  <div className="p-4 shadow-md rounded-xl mb-6 bg-white ">
-                    <p className="text-xl text-bold mb-4">目次</p>
-                    <ul className="list-none p-0">
-                      {tableOfContents.map((anchor: TableOfContent) => {
-                        if (anchor.level === "H1") {
-                          return (
-                            <li className="mb-2" key={anchor.href}>
-                              <a href={anchor.href}>{anchor.title}</a>
-                            </li>
-                          );
-                        } else {
-                          return (
-                            <li className="ml-4 mb-2" key={anchor.href}>
-                              <a href={anchor.href}>{anchor.title}</a>
-                            </li>
-                          );
-                        }
-                      })}
-                    </ul>
-                  </div>
-                  <div className="p-4 shadow-md rounded-xl bg-white">
-                    <Xfeed />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </aside>
-          <h1 className="mt-12">{title}</h1>
-          <span>{published_at}</span>
-          <div className="space-x-2">
+
+          <div className="mb-4">{published_at}</div>
+          <div className="space-x-10 space-y-6 mb-6">
             {categories.map((category) => (
               <span key={category}>
                 <Link href={`/categories/${category}`}>
@@ -157,6 +126,24 @@ const Post = ({
             dangerouslySetInnerHTML={{ __html: blogContentHtml }}
           ></div>
         </div>
+        <aside className="hidden md:block w-64 sticky top-20 self-start">
+          <div className="p-4 shadow-md rounded-xl mb-6 bg-white">
+            <p className="text-xl font-bold mb-4">目次</p>
+            <ul className="list-none p-0">
+              {tableOfContents.map((anchor: TableOfContent) => (
+                <li
+                  key={anchor.href}
+                  className={anchor.level === "H2" ? "ml-4 mb-2" : "mb-2"}
+                >
+                  <a href={anchor.href}>{anchor.title}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="p-4 shadow-md rounded-xl bg-white">
+            <Xfeed />
+          </div>
+        </aside>
       </div>
     </div>
   );
