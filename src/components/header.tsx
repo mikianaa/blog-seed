@@ -14,7 +14,7 @@ const Header = () => {
     <header className="sticky top-0 border-b h-20 z-10 bg-white">
       <div className="max-w-4xl mx-auto flex justify-between items-center h-20">
         <Link href="/">
-          <div className="text-4xl font-medium">Seed</div>
+          <div className="text-3xl font-semibold tracking-wide text-gray-900 dark:text-gray-100 font-serif">Seed</div>
         </Link>
 
         <div className="mb-4">
