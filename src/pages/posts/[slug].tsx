@@ -6,6 +6,7 @@ import matter from "gray-matter";
 import { JSDOM } from "jsdom";
 import Xfeed from "../../components/xfeed";
 import "../../styles/posts.css";
+import { useEffect, useState } from "react";
 
 export interface StaticProps {
   params: { slug: string; category: string; page: number };
@@ -95,8 +96,31 @@ const Post = ({
   blogContentHtml,
   tableOfContents,
 }: PostData) => {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const headings = Array.from(document.querySelectorAll("h1, h2"));
+      let currentId = null;
+
+      for (const heading of headings) {
+        const rect = heading.getBoundingClientRect();
+        if (rect.top >= 0 && rect.top <= window.innerHeight / 2) {
+          currentId = heading.id;
+        }
+      }
+
+      if (currentId !== activeId) {
+        setActiveId(currentId);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeId]);
+
   return (
-    <div className="flex justify-center mt-10">
+    <div className="flex justify-center mt-10 mb-10">
       <div className="flex w-full px-4 gap-6">
         {/* 本文エリア */}
         <div className="flex-1 bg-white shadow-md rounded-xl p-6">
@@ -111,14 +135,28 @@ const Post = ({
             />
           </div>
 
-          <div className="mb-4">{published_at}</div>
-          <div className="space-x-10 space-y-6 mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            {/* 日付表示 */}
+            <div className="text-gray-500 text-sm flex items-center gap-2">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {published_at}
+            </div>
+
+            {/* カテゴリー表示 */}
             {categories.map((category) => (
-              <span key={category}>
-                <Link href={`/categories/${category}`}>
-                  <div>{category}</div>
-                </Link>
-              </span>
+              <Link href={`/categories/${category}`} key={category}>
+                <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
+                  {category}
+                </span>
+              </Link>
             ))}
           </div>
           <div
@@ -126,7 +164,7 @@ const Post = ({
             dangerouslySetInnerHTML={{ __html: blogContentHtml }}
           ></div>
         </div>
-        <aside className="hidden md:block w-64 sticky top-20 self-start">
+        <aside className="hidden md:block w-64 sticky top-32 self-start">
           <div className="p-4 shadow-md rounded-xl mb-6 bg-white">
             <p className="text-xl font-bold mb-4">目次</p>
             <ul className="list-none p-0">
@@ -135,7 +173,13 @@ const Post = ({
                   key={anchor.href}
                   className={anchor.level === "H2" ? "ml-4 mb-2" : "mb-2"}
                 >
-                  <a href={anchor.href}>{anchor.title}</a>
+                  <a
+                    href={anchor.href}
+                    className={`transition-colors ${activeId === anchor.href.replace("#", "") ? "text-sky-500 font-semibold" : "text-gray-700"
+                      }`}
+                  >
+                    {anchor.title}
+                  </a>
                 </li>
               ))}
             </ul>

@@ -4,7 +4,6 @@ import matter from "gray-matter";
 import Pagination from "../components/pagination";
 import PostCard from "../components/postcard";
 import { PostProps } from ".";
-import Link from "next/link";
 
 type PageProps = {
   posts: PostProps[];
