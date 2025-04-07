@@ -1,11 +1,13 @@
 import fs from "fs";
 import Image from "next/image";
 import Link from "next/link";
-import markdownToHtml from "zenn-markdown-html";
+import { marked } from "marked";
 import matter from "gray-matter";
-import { JSDOM } from "jsdom";
 import Xfeed from "../../components/xfeed";
 import "../../styles/posts.css";
+import { useEffect } from "react";
+import tocbot from "tocbot";
+import "tocbot/dist/tocbot.css";
 
 export interface StaticProps {
   params: { slug: string; category: string; page: number };
@@ -18,48 +20,21 @@ type PostData = {
   published_at: string;
   thumbnail: string;
   blogContentHtml: string;
-  tableOfContents: TableOfContent[];
 };
 
-type TableOfContent = {
-  level: string;
-  title: string;
-  href: string;
-};
-
-//h1タグ、h2タグをHTMLから抽出
-function extractHeadings(html: string): TableOfContent[] {
-  const domHtml = new JSDOM(html).window.document;
-
-  // DOMから目次を検索し、{hタグレベル、タイトル名、リンク先}、を取得する
-  const elements = domHtml.querySelectorAll<HTMLElement>("h1, h2");
-  const tableOfContents: TableOfContent[] = [];
-  elements.forEach((element) => {
-    const level = element.tagName;
-    const title = element.innerHTML.split("</a> ")[1];
-    const href = `#${title.toLowerCase().replace(/\s+/g, "-")}`;
-    const record = { level: level, title: title, href: href };
-    tableOfContents.push(record);
-  });
-
-  return tableOfContents;
-}
-
-//静的Props取得
 export async function getStaticProps({ params }: StaticProps) {
   const mdFile = fs.readFileSync(`posts/${params.slug}.md`, "utf-8");
-
   const { data: frontMatter, content } = matter(mdFile);
-
-  //frontMatterの情報を取得
   const title = frontMatter.title;
   const categories = frontMatter.categories;
   const published_at = frontMatter.date;
   const thumbnail = frontMatter.image;
 
-  //本文の内容と目次の情報を取得
-  const blogContentHtml = markdownToHtml(content);
-  const tableOfContents = extractHeadings(blogContentHtml);
+  marked.setOptions({
+    headerIds: true,
+    mangle: false,
+  });
+  const blogContentHtml = marked(content);
 
   return {
     props: {
@@ -68,12 +43,10 @@ export async function getStaticProps({ params }: StaticProps) {
       published_at,
       thumbnail,
       blogContentHtml,
-      tableOfContents,
     },
   };
 }
 
-//静的パスをmdファイルから取得
 export async function getStaticPaths() {
   const files = fs.readdirSync("posts");
   const paths = files.map((fileName) => ({
@@ -83,7 +56,7 @@ export async function getStaticPaths() {
   }));
   return {
     paths,
-    fallback: false,
+    fallback: "blocking",
   };
 }
 
@@ -93,12 +66,20 @@ const Post = ({
   published_at,
   thumbnail,
   blogContentHtml,
-  tableOfContents,
 }: PostData) => {
+  useEffect(() => {
+    tocbot.init({
+      tocSelector: "#toc",
+      contentSelector: ".content-html",
+      headingSelector: "h1, h2",
+      scrollSmooth: true,
+    });
+    return () => tocbot.destroy();
+  }, []);
+
   return (
-    <div className="flex justify-center mt-10">
+    <div className="flex justify-center mt-10 mb-10">
       <div className="flex w-full px-4 gap-6">
-        {/* 本文エリア */}
         <div className="flex-1 bg-white shadow-md rounded-xl p-6">
           <h1 className="text-5xl text-center mb-6">{title}</h1>
           <div className="text-center mb-6">
@@ -111,36 +92,36 @@ const Post = ({
             />
           </div>
 
-          <div className="mb-4">{published_at}</div>
-          <div className="space-x-10 space-y-6 mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <div className="text-gray-500 text-sm flex items-center gap-2">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {published_at}
+            </div>
             {categories.map((category) => (
-              <span key={category}>
-                <Link href={`/categories/${category}`}>
-                  <div>{category}</div>
-                </Link>
-              </span>
+              <Link href={`/categories/${category}`} key={category}>
+                <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
+                  {category}
+                </span>
+              </Link>
             ))}
           </div>
-          <div
-            className="content-html"
-            dangerouslySetInnerHTML={{ __html: blogContentHtml }}
-          ></div>
+
+          <div className="content-html" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
         </div>
-        <aside className="hidden md:block w-64 sticky top-20 self-start">
-          <div className="p-4 shadow-md rounded-xl mb-6 bg-white">
-            <p className="text-xl font-bold mb-4">目次</p>
-            <ul className="list-none p-0">
-              {tableOfContents.map((anchor: TableOfContent) => (
-                <li
-                  key={anchor.href}
-                  className={anchor.level === "H2" ? "ml-4 mb-2" : "mb-2"}
-                >
-                  <a href={anchor.href}>{anchor.title}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+        <aside className="hidden md:block w-64 sticky top-32 self-start">
           <div className="p-4 shadow-md rounded-xl bg-white">
+            <nav id="toc" className="toc text-xl" />
+          </div>
+          <div className="p-4 shadow-md rounded-xl mt-6 bg-white">
             <Xfeed />
           </div>
         </aside>

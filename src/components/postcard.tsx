@@ -19,7 +19,7 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
       </div>
       <div className="px-2 py-4">
-        <h1 className="font-bold text-lg">{post.frontMatter.title}</h1>
+        <h1 className="font-bold text-lg truncate">{post.frontMatter.title}</h1>
         <span>{post.frontMatter.date}</span>
       </div>
     </Link>

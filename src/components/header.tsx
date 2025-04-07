@@ -1,6 +1,7 @@
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const Header = () => {
   const router = useRouter();
@@ -12,10 +13,20 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 border-b h-20 z-10 bg-white">
-      <div className="max-w-4xl mx-auto flex justify-between items-center h-20">
-        <Link href="/">
-          <div className="text-4xl font-medium">Seed</div>
+      <div className="max-w-6xl mx-auto flex justify-between items-center h-20">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition">
+          <Image
+            src="/seed-default.png"
+            alt="Seed logo left"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
+          <div className="text-3xl font-serif font-medium">
+            Seed
+          </div>
         </Link>
+
 
         <div className="mb-4">
           {currentPath === "/new-post" ? (
