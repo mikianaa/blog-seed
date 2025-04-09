@@ -1,10 +1,9 @@
 import Pagination from "@/components/pagination";
 import PostCard from "@/components/postcard";
-import fs from "fs";
+import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import matter from "gray-matter";
-import Link from "next/link";
+import { Readable } from "stream";
 
-//型定義
 export interface PostFrontMatter {
   title: string;
   date: string;
@@ -24,30 +23,55 @@ export interface HomeProps {
   current_page: number;
 }
 
-//ページ分割用の定数と配列
 const PAGE_SIZE = 6;
 const range = (start: number, end: number, length = end - start + 1) =>
   Array.from({ length }, (_, i) => start + i);
 
-//サーバーサイドで静的Props取得
-export const getStaticProps = () => {
-  const files = fs.readdirSync("posts");
-  let posts = files.map((fileName) => {
-    //受け散った配列の各要素に関数を適用する
-    const slug = fileName.replace(/\.md$/, ""); // .mdを消す
-    const fileContent = fs.readFileSync(`posts/${fileName}`, "utf-8");
-    const { data } = matter(fileContent); //yamlファイル先頭を解析してjson形式にする
-    return {
-      frontMatter: data,
-      slug,
-    };
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET_NAME = process.env.S3_BUCKET_NAME!;
+const PREFIX = process.env.S3_POST_PREFIX ?? "";
+
+export const getStaticProps = async () => {
+  const listCommand = new ListObjectsV2Command({
+    Bucket: BUCKET_NAME,
+    Prefix: PREFIX,
   });
 
-  //日付が新しい順にソート
-  posts = posts.sort((postA, postB) =>
-    new Date(postA.frontMatter.date) > new Date(postB.frontMatter.date)
-      ? -1
-      : 1,
+  const listResponse = await s3.send(listCommand);
+  const files = listResponse.Contents?.filter(obj => obj.Key?.endsWith(".md")) ?? [];
+
+  const posts: PostProps[] = [];
+
+  for (const file of files) {
+    const slug = file.Key!.replace(PREFIX, "").replace(/\.md$/, "");
+
+    const getCommand = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: file.Key!,
+    });
+
+    const getObjectResponse = await s3.send(getCommand);
+
+    const bodyContents = await streamToString(getObjectResponse.Body as Readable);
+    const { data, content } = matter(bodyContents);
+
+    posts.push({
+      slug,
+      frontMatter: data as PostFrontMatter,
+      content,
+    });
+  }
+
+  // 日付順ソート
+  posts.sort((a, b) =>
+    new Date(a.frontMatter.date) > new Date(b.frontMatter.date) ? -1 : 1
   );
 
   const pages = range(1, Math.ceil(posts.length / PAGE_SIZE));
@@ -56,9 +80,18 @@ export const getStaticProps = () => {
     props: {
       posts: posts.slice(0, PAGE_SIZE),
       pages,
+      current_page: 1,
     },
   };
 };
+
+async function streamToString(stream: Readable): Promise<string> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
 
 export default function Home({ posts, pages, current_page }: HomeProps) {
   return (

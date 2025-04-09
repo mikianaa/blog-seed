@@ -1,13 +1,12 @@
-import fs from "fs";
-import Image from "next/image";
-import Link from "next/link";
-import { marked } from "marked";
+import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
 import matter from "gray-matter";
-import Xfeed from "../../components/xfeed";
-import "../../styles/posts.css";
+import { marked } from "marked";
+import Xfeed from "@/components/xfeed";
+import Link from "next/link";
+import Image from "next/image";
 import { useEffect } from "react";
 import tocbot from "tocbot";
-import "tocbot/dist/tocbot.css";
 
 export interface StaticProps {
   params: { slug: string; category: string; page: number };
@@ -22,43 +21,74 @@ type PostData = {
   blogContentHtml: string;
 };
 
-export async function getStaticProps({ params }: StaticProps) {
-  const mdFile = fs.readFileSync(`posts/${params.slug}.md`, "utf-8");
-  const { data: frontMatter, content } = matter(mdFile);
-  const title = frontMatter.title;
-  const categories = frontMatter.categories;
-  const published_at = frontMatter.date;
-  const thumbnail = frontMatter.image;
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET_NAME = process.env.S3_BUCKET_NAME!;
+const PREFIX = process.env.S3_POST_PREFIX ?? "";
+
+export async function getStaticProps({ params }: { params: { slug: string } }) {
+  const key = `${PREFIX}${params.slug}.md`;
+
+  const command = new GetObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+  });
+
+  const response = await s3.send(command);
+  const body = await streamToString(response.Body as Readable);
+  const { data: frontMatter, content } = matter(body);
 
   marked.setOptions({
     headerIds: true,
     mangle: false,
   });
-  const blogContentHtml = marked(content);
 
   return {
     props: {
-      title,
-      categories,
-      published_at,
-      thumbnail,
-      blogContentHtml,
+      title: frontMatter.title,
+      categories: frontMatter.categories,
+      published_at: frontMatter.date,
+      thumbnail: frontMatter.image,
+      blogContentHtml: marked(content),
     },
   };
 }
 
 export async function getStaticPaths() {
-  const files = fs.readdirSync("posts");
-  const paths = files.map((fileName) => ({
+  const listCommand = new ListObjectsV2Command({
+    Bucket: BUCKET_NAME,
+    Prefix: PREFIX,
+  });
+
+  const listResponse = await s3.send(listCommand);
+  const files = listResponse.Contents?.filter(obj => obj.Key?.endsWith(".md")) ?? [];
+
+  const paths = files.map(file => ({
     params: {
-      slug: fileName.replace(/\.md$/, ""),
+      slug: file.Key!.replace(PREFIX, "").replace(/\.md$/, ""),
     },
   }));
+
   return {
     paths,
-    fallback: "blocking",
+    fallback: false,
   };
 }
+
+async function streamToString(stream: Readable): Promise<string> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+
 
 const Post = ({
   title,
