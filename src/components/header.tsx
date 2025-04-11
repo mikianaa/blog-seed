@@ -8,7 +8,8 @@ const Header = () => {
   const currentPath = router.pathname;
 
   const handleSignOut = async () => {
-    signOut({ callbackUrl: "/" });
+    // signOut({ callbackUrl: "/" });
+    router.push("/")
   };
 
   return (
@@ -31,10 +32,12 @@ const Header = () => {
         <div className="mb-4">
           {currentPath === "/new-post" ? (
             <button className="button" type="button" onClick={handleSignOut}>
-              Sign out
+              {/* Sign out */}
+              Back to Top
             </button>
           ) : (
-            <Link href="/sign-in">
+            <Link href="/new-post">
+              {/* // <Link href="/sign-in"> */}
               <div className="bg-blue-500 text-white px-4 py-2 rounded">
                 New Post
               </div>
