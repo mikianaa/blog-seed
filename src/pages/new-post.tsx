@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/router";
 import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
+import { apiBaseUrl } from "next-auth/client/_utils";
 
 // Draftタイプの定義
 type Draft = {
@@ -18,13 +19,14 @@ const NewPost = () => {
   const [category, setCategory] = useState("diary");
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [draftFilePath, setDraftFilePath] = useState("");
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const router = useRouter();
 
   // 下書き一覧を取得する関数
   const fetchDrafts = async () => {
     try {
-      const response = await fetch("/api/get-drafts");
+      const response = await fetch(`${apiBaseUrl}/getDrafts`);
       if (!response.ok) {
         throw new Error("Failed to fetch drafts");
       }
@@ -40,7 +42,7 @@ const NewPost = () => {
   }, []);
 
   const deleteDraft = async (draftPath: string) => {
-    const res = await fetch("/api/delete-draft", {
+    const res = await fetch(`${apiBaseUrl}/deleteDraft`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -92,7 +94,9 @@ ${content}`;
     const blob = new Blob([frontMatter], { type: "text/markdown" });
     const file = new File([blob], `${title.replace(/[^a-zA-Z0-9]/g, "_")}.md`);
     const apiEndpoint =
-      publicationType === "public" ? "/api/upload-new-post" : "/api/upload-draft";
+      publicationType === "public"
+        ? `${apiBaseUrl}/uploadNewPost`
+        : `${apiBaseUrl}/uploadDraft`;
     formData.append("file", file);
     if (publicationType === "pulic" && draftFilePath != "") {
       formData.append("draftFilePath", draftFilePath);
