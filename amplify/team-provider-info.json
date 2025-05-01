@@ -16,10 +16,7 @@
         "blogseede70db8fa": {}
       },
       "storage": {
-        "blogseed1e5e3881": {
-          "bucketName": "mikia-seed-dev-bucket",
-          "region": "us-east-1"
-        }
+        "mikiaSeedAmplifyStorage": {}
       }
     }
   }

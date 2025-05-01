@@ -25,30 +25,11 @@
       "service": "Cognito"
     }
   },
-  "parameters": {
-    "AMPLIFY_storage_blogseed1e5e3881_bucketName": {
-      "usedBy": [
-        {
-          "category": "storage",
-          "resourceName": "blogseed1e5e3881"
-        }
-      ]
-    },
-    "AMPLIFY_storage_blogseed1e5e3881_region": {
-      "usedBy": [
-        {
-          "category": "storage",
-          "resourceName": "blogseed1e5e3881"
-        }
-      ]
-    }
-  },
   "storage": {
-    "blogseed1e5e3881": {
+    "mikiaSeedAmplifyStorage": {
       "dependsOn": [],
       "providerPlugin": "awscloudformation",
-      "service": "S3",
-      "serviceType": "imported"
+      "service": "S3"
     }
   }
 }

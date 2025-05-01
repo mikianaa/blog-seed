@@ -1,0 +1,18 @@
+{
+  "resourceName": "mikiaSeedAmplifyStorage",
+  "policyUUID": "df39ee3b",
+  "bucketName": "mikia-seed-amplify-bucket",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
