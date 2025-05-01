@@ -2,9 +2,8 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/router";
 import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
-import { apiBaseUrl } from "next-auth/client/_utils";
+import { uploadData, remove } from "aws-amplify/storage";
 
-// Draftタイプの定義
 type Draft = {
   title: string;
   image: string;
@@ -37,23 +36,18 @@ const NewPost = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDrafts();
-  }, []);
+  // useEffect(() => {
+  //   fetchDrafts();
+  // }, []);
 
   const deleteDraft = async (draftPath: string) => {
-    const res = await fetch(`${apiBaseUrl}/deleteDraft`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ draftFilePath: draftPath }),
-    });
-
-    if (res.ok) {
-      console.log("Draft deleted successfully");
-    } else {
-      console.error("Failed to delete draft");
+    try {
+      await remove({ path: draftPath });
+      console.log("Draft deleted from S3");
+      setDrafts(prev => prev.filter(d => d.draftFilePath !== draftPath));
+    } catch (err) {
+      console.error("Failed to delete draft:", err);
+      alert("Failed to delete draft");
     }
   };
 
@@ -77,57 +71,53 @@ const NewPost = () => {
     setDraftFilePath(draft.draftFilePath);
   };
 
-  const saveMdFile = async (publicationType: string) => {
-    const date = new Date().toISOString().slice(0, 10);
+  const saveMdFile = async (publicationType: "public" | "draft") => {
+    const dateStr = new Date().toISOString().slice(0, 10); // 例: 2025-05-01
     const frontMatter = `---
-title: '${title}'
-date: '${date}'
-description: ''
-image: 'seed-default.png'
-categories: ['${category}']
-publications: ['${publicationType}']
----
+  title: '${title}'
+  date: '${dateStr}'
+  description: ''
+  image: 'seed-default.png'
+  categories: ['${category}']
+  publications: ['${publicationType}']
+  ---
+  
+  ${content}`;
 
-${content}`;
-
-    const formData = new FormData();
     const blob = new Blob([frontMatter], { type: "text/markdown" });
-    const file = new File([blob], `${title.replace(/[^a-zA-Z0-9]/g, "_")}.md`);
-    const apiEndpoint =
-      publicationType === "public"
-        ? `${apiBaseUrl}/uploadNewPost`
-        : `${apiBaseUrl}/uploadDraft`;
-    formData.append("file", file);
-    if (publicationType === "pulic" && draftFilePath != "") {
-      formData.append("draftFilePath", draftFilePath);
-    }
+    const fileName =
+      `${dateStr.replace(/-/g, "")}_${crypto.randomUUID()}.md`;
+    const prefix = publicationType === "public" ? "posts/" : "drafts/";
+    const s3Path = `public/${prefix}${fileName}`;
 
-    const res = await fetch(apiEndpoint, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      await uploadData({
+        path: s3Path,
+        data: blob,
+        options: {
+          contentType: "text/markdown"
+        }
+      });
 
-    if (res.ok) {
       if (publicationType === "public") {
         alert("Article uploaded successfully");
-        //下書きからuploadした場合は下書きを削除する
-        if (draftFilePath !== "") {
+        if (draftFilePath) {
           await deleteDraft(draftFilePath);
+          setDraftFilePath("");
         }
-
         router.push("/");
-      } else if (publicationType === "draft") {
-        alert("Draft saved successfully");
       } else {
-        alert("Something went wrong!");
+        alert("Draft saved successfully");
+        setDraftFilePath(s3Path);
       }
-    } else {
-      alert("Failed to process the request");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload file to S3");
     }
   };
 
-  const handleUpload = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+
+  const handleUpload = async () => {
     saveMdFile("public");
   };
 
@@ -178,7 +168,7 @@ ${content}`;
           <button className="button" type="button" onClick={handleSaveDraft}>
             Save Draft
           </button>
-          <button className="button" type="submit">
+          <button className="button" type="submit" onClick={handleUpload}>
             Post Article
           </button>
         </form>
