@@ -1,18 +1,19 @@
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import Layout from "../components/layout";
 import "../styles/globals.css";
-import SEO from "../../next-seo.config";
 import { DefaultSeo } from "next-seo";
-import { SessionProvider } from "next-auth/react";
+import SEO from "../../next-seo.config";
+import { Amplify } from "aws-amplify";
+import awsExports from "../aws-exports";
 
-function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+Amplify.configure(awsExports, { ssr: true });
+
+function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <SessionProvider session={session}>
-      <Layout>
-        <DefaultSeo {...SEO} />
-        <Component {...pageProps} />
-      </Layout>
-    </SessionProvider>
+    <Layout>
+      <DefaultSeo {...SEO} />
+      <Component {...pageProps} />
+    </Layout>
   );
 }
 
