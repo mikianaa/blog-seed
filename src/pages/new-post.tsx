@@ -1,8 +1,9 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/router";
 import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
-import { uploadData, remove } from "aws-amplify/storage";
+import { uploadData, remove, list, getUrl } from "aws-amplify/storage";
+import matter from "gray-matter";
 
 type Draft = {
   title: string;
@@ -17,28 +18,49 @@ const NewPost = () => {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("diary");
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [nextToken, setNextToken] = useState<string | undefined>();
+  const [prevTokens, setPrevTokens] = useState<string[]>([]);
   const [draftFilePath, setDraftFilePath] = useState("");
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const PAGE_SIZE = 10;
 
   const router = useRouter();
 
-  // 下書き一覧を取得する関数
-  const fetchDrafts = async () => {
+  const fetchDrafts = async (token?: string) => {
     try {
-      const response = await fetch(`${apiBaseUrl}/getDrafts`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch drafts");
-      }
-      const data = await response.json();
-      setDrafts(data.drafts);
-    } catch (error) {
-      console.error("Error fetching drafts:", error);
+      const { items, nextToken: after } = await list({
+        path: "public/drafts/",
+        options: {
+          pageSize: PAGE_SIZE,
+          nextToken: token
+        }
+      });
+
+      const pageDrafts: Draft[] = await Promise.all(
+        items.map(async obj => {
+          const { url } = await getUrl({ path: obj.path });
+          const md = await (await fetch(url)).text();
+          const { data, content } = matter(md);
+          return {
+            title: data.title ?? "(untitled)",
+            image: data.image ?? "/seed-default.png",
+            category: (data.categories?.[0] ?? "diary") as string,
+            content: content.trim(),
+            draftFilePath: obj.path
+          };
+        })
+      );
+
+      setDrafts(pageDrafts);
+      setNextToken(after);
+    } catch (err) {
+      console.error("Error fetching drafts:", err);
     }
   };
 
-  // useEffect(() => {
-  //   fetchDrafts();
-  // }, []);
+
+  useEffect(() => {
+    fetchDrafts();
+  }, []);
 
   const deleteDraft = async (draftPath: string) => {
     try {
@@ -74,15 +96,15 @@ const NewPost = () => {
   const saveMdFile = async (publicationType: "public" | "draft") => {
     const dateStr = new Date().toISOString().slice(0, 10); // 例: 2025-05-01
     const frontMatter = `---
-  title: '${title}'
-  date: '${dateStr}'
-  description: ''
-  image: 'seed-default.png'
-  categories: ['${category}']
-  publications: ['${publicationType}']
-  ---
-  
-  ${content}`;
+title: "${title}"
+date: "${dateStr}"
+description: ""
+image: "seed-default.png"
+categories: ["${category}"]
+publications: ["${publicationType}"]
+---
+
+${content}`;
 
     const blob = new Blob([frontMatter], { type: "text/markdown" });
     const fileName =
@@ -116,6 +138,19 @@ const NewPost = () => {
     }
   };
 
+  const handleNext = () => {
+    if (!nextToken) return;
+    setPrevTokens(p => [...p, nextToken]);
+    fetchDrafts(nextToken);
+  };
+
+  const handlePrev = () => {
+    const tokens = [...prevTokens];
+    const prev = tokens.pop();
+    setPrevTokens(tokens);
+    fetchDrafts(prev);
+  };
+
 
   const handleUpload = async () => {
     saveMdFile("public");
@@ -129,7 +164,7 @@ const NewPost = () => {
     <div className="container flex">
       {/* 左側の入力エリア */}
       <div className="w-2/3 pr-4">
-        <form className="form bg-white p-6 rounded shadow" onSubmit={handleUpload}>
+        <form className="form bg-white p-6 rounded shadow">
           <div>
             <label className="label" htmlFor="title">
               Title:
@@ -198,6 +233,14 @@ const NewPost = () => {
                 </div>
               ))}
             </div>)}
+        </div>
+        {/* ナビゲーションボタン   */}
+        <div className="flex justify-between mt-4">
+          <button onClick={handlePrev} disabled={prevTokens.length === 0}
+            className="button">Prev</button>
+
+          <button onClick={handleNext} disabled={!nextToken}
+            className="button">Next</button>
         </div>
       </div>
     </div>
