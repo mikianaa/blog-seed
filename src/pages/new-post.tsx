@@ -4,6 +4,7 @@ import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
 import { uploadData, remove, list, getUrl } from "aws-amplify/storage";
 import matter from "gray-matter";
+import { title } from "process";
 
 type Draft = {
   title: string;
@@ -21,6 +22,7 @@ const NewPost = () => {
   const [nextToken, setNextToken] = useState<string | undefined>();
   const [prevTokens, setPrevTokens] = useState<string[]>([]);
   const [draftFilePath, setDraftFilePath] = useState("");
+  const [loading, setLoading] = useState(false);
   const PAGE_SIZE = 10;
 
   const router = useRouter();
@@ -94,7 +96,8 @@ const NewPost = () => {
   };
 
   const saveMdFile = async (publicationType: "public" | "draft") => {
-    const dateStr = new Date().toISOString().slice(0, 10); // 例: 2025-05-01
+    setLoading(true);
+    const dateStr = new Date().toISOString().slice(0, 10);
     const frontMatter = `---
 title: "${title}"
 date: "${dateStr}"
@@ -107,10 +110,13 @@ publications: ["${publicationType}"]
 ${content}`;
 
     const blob = new Blob([frontMatter], { type: "text/markdown" });
-    const fileName =
-      `${dateStr.replace(/-/g, "")}_${crypto.randomUUID()}.md`;
-    const prefix = publicationType === "public" ? "posts/" : "drafts/";
-    const s3Path = `public/${prefix}${fileName}`;
+    const isEditingDraft = publicationType === "draft" && draftFilePath !== "";
+    const fileName = isEditingDraft
+      ? draftFilePath.replace("public/", "")
+      : `${publicationType === "draft" ? "drafts/" : "posts/"}${dateStr.replace(/-/g, "")}_${crypto.randomUUID()}.md`;
+
+    const s3Path = `public/${fileName}`;
+
 
     try {
       await uploadData({
@@ -128,6 +134,7 @@ ${content}`;
           setDraftFilePath("");
         }
         router.push("/");
+        return;
       } else {
         alert("Draft saved successfully");
         setDraftFilePath(s3Path);
@@ -135,6 +142,9 @@ ${content}`;
     } catch (err) {
       console.error(err);
       alert("Failed to upload file to S3");
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -158,92 +168,100 @@ ${content}`;
 
   const handleSaveDraft = async () => {
     saveMdFile("draft");
+    setTimeout(fetchDrafts, 3000);
   };
 
   return (
-    <div className="container flex">
-      {/* 左側の入力エリア */}
-      <div className="w-2/3 pr-4">
-        <form className="form bg-white p-6 rounded shadow">
-          <div>
-            <label className="label" htmlFor="title">
-              Title:
-            </label>
-            <input
-              className="input"
-              type="text"
-              id="title"
-              value={title}
-              onChange={handleTitleChange}
-              required
-            />
-          </div>
-          <div>
-            <label className="label" htmlFor="content">
-              Content:
-            </label>
-            <MarkDownEditor
-              value={content}
-              onChange={(value) => handleContentChange(value)}
-            />
-          </div>
-          <div>
-            <label className="label" htmlFor="category">
-              Category:
-            </label>
-            <select
-              className="select"
-              id="category"
-              value={category}
-              onChange={handleCategoryChange}
-            >
-              <option value="diary">Diary</option>
-            </select>
-          </div>
-          <button className="button" type="button" onClick={handleSaveDraft}>
-            Save Draft
-          </button>
-          <button className="button" type="submit" onClick={handleUpload}>
-            Post Article
-          </button>
-        </form>
-      </div>
+    <>
+      {loading && (
+        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="text-xl font-bold">保存中...</div>
+        </div>
+      )}
+      <div className="container flex">
+        {/* 左側の入力エリア */}
+        <div className="w-2/3 pr-4">
+          <form className="form bg-white p-6 rounded shadow">
+            <div>
+              <label className="label" htmlFor="title">
+                Title:
+              </label>
+              <input
+                className="input"
+                type="text"
+                id="title"
+                value={title}
+                onChange={handleTitleChange}
+                required
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="content">
+                Content:
+              </label>
+              <MarkDownEditor
+                value={content}
+                onChange={(value) => handleContentChange(value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="category">
+                Category:
+              </label>
+              <select
+                className="select"
+                id="category"
+                value={category}
+                onChange={handleCategoryChange}
+              >
+                <option value="diary">Diary</option>
+              </select>
+            </div>
+            <button className="button" type="button" onClick={handleSaveDraft}>
+              Save Draft
+            </button>
+            <button className="button" type="button" onClick={handleUpload}>
+              Post Article
+            </button>
+          </form>
+        </div>
 
-      {/* 右側のDraftエリア */}
-      <div className="w-1/3 pl-4">
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-xl font-bold mb-4">Draft</h2>
-          {drafts.length === 0 ? (<p className="text-gray-500">下書きがありません</p>) : (
-            <div className="space-y-4">
-              {drafts.map((draft, index) => (
-                <div
-                  key={index}
-                  className="border p-4 flex items-center cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleDraftSelect(draft)}
-                >
-                  <img
-                    src={draft.image}
-                    alt={draft.title}
-                    className="w-16 h-16 mr-4"
-                  />
-                  <div>
-                    <h3 className="text-lg font-semibold">{draft.title}</h3>
-                    <p className="text-sm text-gray-600">{draft.category}</p>
+        {/* 右側のDraftエリア */}
+        <div className="w-1/3 pl-4">
+          <div className="bg-white p-6 rounded shadow">
+            <h2 className="text-xl font-bold mb-4">Draft</h2>
+            {drafts.length === 0 ? (<p className="text-gray-500">下書きがありません</p>) : (
+              <div className="space-y-4">
+                {drafts.map((draft, index) => (
+                  <div
+                    key={index}
+                    className="border p-4 flex items-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleDraftSelect(draft)}
+                  >
+                    <img
+                      src={draft.image}
+                      alt={draft.title}
+                      className="w-16 h-16 mr-4"
+                    />
+                    <div>
+                      <h3 className="text-lg font-semibold">{draft.title}</h3>
+                      <p className="text-sm text-gray-600">{draft.category}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>)}
-        </div>
-        {/* ナビゲーションボタン   */}
-        <div className="flex justify-between mt-4">
-          <button onClick={handlePrev} disabled={prevTokens.length === 0}
-            className="button">Prev</button>
+                ))}
+              </div>)}
+          </div>
+          {/* ナビゲーションボタン   */}
+          <div className="flex justify-between mt-4">
+            <button onClick={handlePrev} disabled={prevTokens.length === 0}
+              className="button">Prev</button>
 
-          <button onClick={handleNext} disabled={!nextToken}
-            className="button">Next</button>
+            <button onClick={handleNext} disabled={!nextToken}
+              className="button">Next</button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
