@@ -12,9 +12,6 @@
       "AmplifyAppId": "d1gk359f4qgm5b"
     },
     "categories": {
-      "auth": {
-        "blogseede70db8fa": {}
-      },
       "storage": {
         "mikiaSeedAmplifyStorage": {}
       }
