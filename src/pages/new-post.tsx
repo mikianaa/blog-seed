@@ -4,7 +4,6 @@ import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
 import { uploadData, remove, list, getUrl } from "aws-amplify/storage";
 import matter from "gray-matter";
-import { title } from "process";
 
 type Draft = {
   title: string;
@@ -24,6 +23,7 @@ const NewPost = () => {
   const [draftFilePath, setDraftFilePath] = useState("");
   const [loading, setLoading] = useState(false);
   const PAGE_SIZE = 10;
+  const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL!;
 
   const router = useRouter();
 
@@ -123,8 +123,8 @@ ${content}`;
         path: s3Path,
         data: blob,
         options: {
-          contentType: "text/markdown"
-        }
+          contentType: "text/markdown",
+        },
       });
 
       if (publicationType === "public") {
@@ -133,6 +133,7 @@ ${content}`;
           await deleteDraft(draftFilePath);
           setDraftFilePath("");
         }
+        await fetch("/api/trigger-rebuild", { method: "POST" });
         router.push("/");
         return;
       } else {
