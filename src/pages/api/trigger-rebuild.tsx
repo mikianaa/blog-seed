@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === "POST") {
-        const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL!;
+        const webhookUrl = process.env.AMPLIFY_WEBHOOK_URL!;
         const result = await fetch(webhookUrl, { method: "POST" });
 
         if (result.ok) {
