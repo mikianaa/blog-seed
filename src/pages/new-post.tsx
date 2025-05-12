@@ -22,8 +22,7 @@ const NewPost = () => {
   const [prevTokens, setPrevTokens] = useState<string[]>([]);
   const [draftFilePath, setDraftFilePath] = useState("");
   const [loading, setLoading] = useState(false);
-  const PAGE_SIZE = 10;
-  const webhookUrl = process.env.NEXT_PUBLIC_WEBHOOK_URL!;
+  const PAGE_SIZE = 5;
 
   const router = useRouter();
 
@@ -149,6 +148,18 @@ ${content}`;
     }
   };
 
+  const resetEditor = () => {
+    if (title || content) {
+      const ok = confirm("編集中の内容が失われます。続けますか？");
+      if (!ok) return;
+    }
+    setTitle("");
+    setContent("");
+    setCategory("diary");
+    setDraftFilePath("");
+  };
+
+
   const handleNext = () => {
     if (!nextToken) return;
     setPrevTokens(p => [...p, nextToken]);
@@ -156,8 +167,10 @@ ${content}`;
   };
 
   const handlePrev = () => {
+    if (prevTokens.length === 0) return;
     const tokens = [...prevTokens];
-    const prev = tokens.pop();
+    tokens.pop()
+    const prev = tokens[tokens.length - 1];
     setPrevTokens(tokens);
     fetchDrafts(prev);
   };
@@ -218,38 +231,56 @@ ${content}`;
                 <option value="diary">Diary</option>
               </select>
             </div>
-            <button className="button" type="button" onClick={handleSaveDraft}>
-              Save Draft
-            </button>
-            <button className="button" type="button" onClick={handleUpload}>
-              Post Article
-            </button>
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="button" type="button" onClick={resetEditor}>
+                新規作成
+              </button>
+              <button className="button" type="button" onClick={handleSaveDraft}>
+                Save Draft
+              </button>
+              <button className="button" type="button" onClick={handleUpload}>
+                Post Article
+              </button>
+            </div>
           </form>
         </div>
 
         {/* 右側のDraftエリア */}
         <div className="w-1/3 pl-4">
           <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-xl font-bold mb-4">Draft</h2>
+            <div>
+              <label className="label" htmlFor="category">
+                Draft
+              </label>
+            </div>
             {drafts.length === 0 ? (<p className="text-gray-500">下書きがありません</p>) : (
               <div className="space-y-4">
-                {drafts.map((draft, index) => (
-                  <div
-                    key={index}
-                    className="border p-4 flex items-center cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleDraftSelect(draft)}
-                  >
-                    <img
-                      src={draft.image}
-                      alt={draft.title}
-                      className="w-16 h-16 mr-4"
-                    />
-                    <div>
-                      <h3 className="text-lg font-semibold">{draft.title}</h3>
-                      <p className="text-sm text-gray-600">{draft.category}</p>
+                {drafts.map((draft, index) => {
+                  const isEditing = draft.draftFilePath === draftFilePath;
+                  return (
+                    <div
+                      key={index}
+                      className={`border p-4 flex items-center cursor-pointer hover:bg-gray-100 ${isEditing ? "bg-blue-100 border-blue-500" : ""
+                        }`}
+                      onClick={() => handleDraftSelect(draft)}
+                    >
+                      <img
+                        src={draft.image}
+                        alt={draft.title}
+                        className="w-16 h-16 mr-4"
+                      />
+                      <div>
+                        <h3 className="text-lg font-semibold">{draft.title}</h3>
+                        {isEditing && (
+                          <span className="ml-2 px-2 py-0.5 text-xs font-bold text-blue-800 bg-blue-200 rounded">
+                            編集中
+                          </span>
+                        )}
+                        <p className="text-sm text-gray-600">{draft.category}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>)}
           </div>
           {/* ナビゲーションボタン   */}
