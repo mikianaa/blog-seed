@@ -185,6 +185,22 @@ ${content}`;
     setTimeout(fetchDrafts, 3000);
   };
 
+  const handleDelete = async (e: React.MouseEvent, draft: Draft) => {
+    e.stopPropagation();
+
+    const ok = window.confirm(`「${draft.title}」を削除しますか？`);
+    if (!ok) return;
+
+    try {
+      await deleteDraft(draft.draftFilePath);
+      if (draftFilePath === draft.draftFilePath) {
+        resetEditor();
+      }
+    } catch (err) {
+      alert("削除に失敗しました");
+      console.error("Failed to delete draft:", err);
+    }
+  };
   return (
     <>
       {loading && (
@@ -260,25 +276,35 @@ ${content}`;
                   return (
                     <div
                       key={index}
-                      className={`border p-4 flex items-center cursor-pointer hover:bg-gray-100 ${isEditing ? "bg-blue-100 border-blue-500" : ""
-                        }`}
+                      className={`border p-4 flex items-start gap-4 cursor-pointer hover:bg-gray-100 ${isEditing ? "bg-blue-100 border-blue-500" : ""}`}
                       onClick={() => handleDraftSelect(draft)}
                     >
                       <img
                         src={draft.image}
                         alt={draft.title}
-                        className="w-16 h-16 mr-4"
+                        className="w-16 h-16"
                       />
-                      <div>
-                        <h3 className="text-lg font-semibold">{draft.title}</h3>
-                        {isEditing && (
-                          <span className="ml-2 px-2 py-0.5 text-xs font-bold text-blue-800 bg-blue-200 rounded">
-                            編集中
-                          </span>
-                        )}
+                      <div className="flex flex-col flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold truncate w-28">{draft.title}</h3>
+                          {isEditing && (
+                            <span className="ml-2 px-2 py-0.5 text-xs font-bold text-blue-800 bg-blue-200 rounded whitespace-nowrap">
+                              編集中
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-600">{draft.category}</p>
+                        <div className="flex justify-end mt-2">
+                          <button
+                            onClick={(e) => handleDelete(e, draft)}
+                            className="text-gray-400 hover:text-red-600 text-sm"
+                          >
+                            🗑 削除
+                          </button>
+                        </div>
                       </div>
                     </div>
+
                   )
                 })}
               </div>)}
