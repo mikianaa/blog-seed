@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@aws-amplify/storage": "^6.8.4",
+    "@aws-amplify/ui-react": "^6.11.1",
     "@aws-sdk/client-s3": "^3.782.0",
     "@tailwindcss/typography": "^0.5.13",
     "autoprefixer": "^10.4.19",

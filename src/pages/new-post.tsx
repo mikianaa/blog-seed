@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import "../styles/new-post.css";
 import MarkDownEditor from "@/components/markdown-editor";
 import { uploadData, remove, list, getUrl } from "aws-amplify/storage";
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import matter from "gray-matter";
 
 type Draft = {
@@ -208,7 +210,7 @@ ${content}`;
           <div className="text-xl font-bold">保存中...</div>
         </div>
       )}
-      <div className="container flex">
+      <div className="container flex mt-0 pt-0 mb-10">
         {/* 左側の入力エリア */}
         <div className="w-2/3 pr-4">
           <form className="form bg-white p-6 rounded shadow">
@@ -304,7 +306,6 @@ ${content}`;
                         </div>
                       </div>
                     </div>
-
                   )
                 })}
               </div>)}
@@ -323,5 +324,22 @@ ${content}`;
   );
 };
 
-export default NewPost;
-
+export default function NewPostPage() {
+  return (
+    <div className="pt-5">
+      <Authenticator socialProviders={['google']}>
+        {({ signOut }) => (
+          <>
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-sm text-gray-600">ログイン中: </p>
+              <button className="text-blue-600 text-sm" onClick={signOut}>
+                サインアウト
+              </button>
+            </div>
+            <NewPost />
+          </>
+        )}
+      </Authenticator>
+    </div>
+  );
+}
