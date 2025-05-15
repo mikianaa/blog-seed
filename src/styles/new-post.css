@@ -1,11 +1,9 @@
 .container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
     min-height: 80vh;
     min-width: 100vh;
-    /* padding-top: 10px; ヘッダーとのスペースを確保 */
-    background-color: #f9f9f9;
 }
 
 .form {

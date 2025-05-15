@@ -210,7 +210,7 @@ ${content}`;
           <div className="text-xl font-bold">保存中...</div>
         </div>
       )}
-      <div className="container flex mt-0 pt-0 mb-10">
+      <div className="container">
         {/* 左側の入力エリア */}
         <div className="w-2/3 pr-4">
           <form className="form bg-white p-6 rounded shadow">
@@ -329,7 +329,7 @@ export default function NewPostPage() {
     <div className="pt-5">
       <Authenticator socialProviders={['google']}>
         {({ signOut }) => (
-          <>
+          <div className="flex flex-col container mx-auto">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-gray-600">ログイン中: </p>
               <button className="text-blue-600 text-sm" onClick={signOut}>
@@ -337,7 +337,7 @@ export default function NewPostPage() {
               </button>
             </div>
             <NewPost />
-          </>
+          </div>
         )}
       </Authenticator>
     </div>
