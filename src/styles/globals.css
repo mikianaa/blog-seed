@@ -4,7 +4,7 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 245, 246, 247;
   --background-end-rgb: 255, 255, 255;
 }
 
@@ -40,11 +40,11 @@ body {
   }
 }
 
-/* Todo　画像の大きさ調整 */
+
 .postcard-image-container {
   position: relative;
   width: 100%;
-  height: 200px; /* 固定高さを設定 */
+  height: 180px; 
   overflow: hidden;
   border: 0.5px double #000;
 }
@@ -54,3 +54,13 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+/* tocbot */
+.toc a {
+  @apply text-gray-700 hover:text-blue-600;
+}
+
+.toc a.is-active-link {
+  @apply text-blue-600 font-bold;
+}
+
