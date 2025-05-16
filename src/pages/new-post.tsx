@@ -210,7 +210,7 @@ ${content}`;
           <div className="text-xl font-bold">保存中...</div>
         </div>
       )}
-      <div className="container">
+      <div className="flex w-full max-w-6xl gap-6 mb-10">
         {/* 左側の入力エリア */}
         <div className="w-2/3 pr-4">
           <form className="form bg-white p-6 rounded shadow">
@@ -286,7 +286,7 @@ ${content}`;
                         alt={draft.title}
                         className="w-16 h-16"
                       />
-                      <div className="flex flex-col flex-1">
+                      <div className="flex flex-col flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold truncate w-28">{draft.title}</h3>
                           {isEditing && (
