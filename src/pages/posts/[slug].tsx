@@ -2,11 +2,11 @@ import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/clien
 import { Readable } from "stream";
 import matter from "gray-matter";
 import { marked } from "marked";
-import Xfeed from "@/components/xfeed";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect } from "react";
 import tocbot from "tocbot";
+import ProfileCard from "@/components/profile-card";
 
 export interface StaticProps {
   params: { slug: string; category: string; page: number };
@@ -144,15 +144,15 @@ const Post = ({
             ))}
           </div>
 
-          <div className="content-html" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
+          <div className="content-html prose prose-blue" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
         </div>
 
         <aside className="hidden md:block w-64 sticky top-32 self-start">
           <div className="p-4 shadow-md rounded-xl bg-white">
             <nav id="toc" className="toc text-xl" />
           </div>
-          <div className="p-4 shadow-md rounded-xl mt-6 bg-white">
-            <Xfeed />
+          <div className="p-4 mt-6">
+            <ProfileCard avatarSrc={"/seed-default.png"} name={"Mikia"} intro={"Love: Math, Techno(logy) and you all"} />
           </div>
         </aside>
       </div>
