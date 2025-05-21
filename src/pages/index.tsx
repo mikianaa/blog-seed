@@ -10,5 +10,5 @@ export const getServerSideProps: GetServerSideProps = async () => {
 };
 
 export default function HomeRedirect() {
-  return null; // 実際には表示されることはない
+  return null;
 }

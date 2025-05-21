@@ -1,6 +1,6 @@
-import { PostProps } from "../pages/index";
 import Link from "next/link";
 import Image from "next/image";
+import { PostProps } from "@/pages/categories/[category]/[page]";
 
 interface PostCardProps {
   post: PostProps;
