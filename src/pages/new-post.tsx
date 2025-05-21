@@ -345,7 +345,7 @@ ${content}`;
 export default function NewPostPage() {
   return (
     <div className="pt-5">
-      <Authenticator socialProviders={['google']}>
+      <Authenticator initialState="signIn" hideSignUp>
         {({ signOut }) => (
           <div className="flex flex-col container mx-auto">
             <div className="flex justify-between items-center mb-4">
