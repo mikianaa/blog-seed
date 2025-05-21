@@ -24,6 +24,7 @@ const NewPost = () => {
   const [prevTokens, setPrevTokens] = useState<string[]>([]);
   const [draftFilePath, setDraftFilePath] = useState("");
   const [loading, setLoading] = useState(false);
+  const [categoryList, setCategoryList] = useState<{ label: string; path: string }[]>([]);
   const PAGE_SIZE = 5;
 
   const router = useRouter();
@@ -60,9 +61,22 @@ const NewPost = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const { url } = await getUrl({ path: "public/categories.json" });
+      const res = await fetch(url);
+      const json = await res.json();
+      const filtered = json.filter((cat: { label: string }) => cat.label.toLowerCase() !== "all");
+      setCategoryList(filtered);
+    } catch (err) {
+      console.error("カテゴリの取得に失敗しました:", err);
+    }
+  };
+
 
   useEffect(() => {
     fetchDrafts();
+    fetchCategories();
   }, []);
 
   const deleteDraft = async (draftPath: string) => {
@@ -246,7 +260,11 @@ ${content}`;
                 value={category}
                 onChange={handleCategoryChange}
               >
-                <option value="diary">Diary</option>
+                {categoryList.map((cat) => (
+                  <option key={cat.path} value={cat.path}>
+                    {cat.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex justify-end gap-2 mt-4">
