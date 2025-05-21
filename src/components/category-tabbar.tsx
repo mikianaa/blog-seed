@@ -28,7 +28,7 @@ const ScrollableTabBar: React.FC<TabBarProps> = ({ categories, selectedPath, onS
                             onSelect(category);
                             router.push(
                                 {
-                                    pathname: category.path === "" ? "/" : `/categories/${category.path}`,
+                                    pathname: category.path === "all" ? "/" : `/categories/${category.path}/1`,
                                     query: { label: category.label }
                                 })
                         }
