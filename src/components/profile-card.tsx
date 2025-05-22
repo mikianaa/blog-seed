@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FaTwitter, FaInstagram } from "react-icons/fa";
+import { SiHatenabookmark } from "react-icons/si";
 
 type ProfileCardProps = {
     avatarSrc: string;
@@ -32,29 +34,25 @@ export default function ProfileCard({
             </div>
             <h2 className="text-xl font-bold mb-2">{name}</h2>
             <p className="text-gray-600 text-sm mb-4">{intro}</p>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-6 mt-4 text-2xl">
                 {twitterUrl && (
                     <Link href={twitterUrl} target="_blank" rel="noopener noreferrer">
-                        <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm hover:bg-blue-200 transition">
-                            Twitter
-                        </span>
+                        <FaTwitter className="text-blue-500 hover:text-blue-700 transition-transform duration-200 hover:scale-110" />
                     </Link>
                 )}
                 {instagramUrl && (
                     <Link href={instagramUrl} target="_blank" rel="noopener noreferrer">
-                        <span className="inline-block bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm hover:bg-pink-200 transition">
-                            Instagram
-                        </span>
+                        <FaInstagram className="text-pink-500 hover:text-pink-700 transition-transform duration-200 hover:scale-110" />
                     </Link>
                 )}
                 {hatenaUrl && (
                     <Link href={hatenaUrl} target="_blank" rel="noopener noreferrer">
-                        <span className="inline-block bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm hover:bg-indigo-200 transition">
-                            はてな
-                        </span>
+                        <SiHatenabookmark className="text-indigo-600 hover:text-indigo-800 transition-transform duration-200 hover:scale-110" />
                     </Link>
                 )}
             </div>
+
+
         </div>
     );
 }
