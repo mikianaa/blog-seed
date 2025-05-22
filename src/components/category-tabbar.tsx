@@ -20,9 +20,9 @@ const ScrollableTabBar: React.FC<TabBarProps> = ({ categories, selectedPath, onS
                 {categories.map((category) => (
                     <button
                         key={category.path || "all"}
-                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-200 
+                        className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-300 transform
               ${selectedPath === category.path
-                                ? "border-blue-600 text-blue-600"
+                                ? "border-blue-600 text-blue-600 scale-200"
                                 : "border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500"}`}
                         onClick={() => {
                             onSelect(category);
