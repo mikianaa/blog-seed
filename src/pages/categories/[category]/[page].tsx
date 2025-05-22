@@ -7,6 +7,7 @@ import { Readable } from "stream";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { StaticProps } from "../../posts/[slug]";
+import { motion, AnimatePresence } from "framer-motion";
 
 export interface PostFrontMatter {
     title: string;
@@ -150,11 +151,20 @@ const CategoryPage = ({ posts, pages, current_page, categories }: HomeProps) => 
                 selectedPath={selectedCategory.path}
                 onSelect={setSelectedCategory}
             />
-            <div className="grid grid-cols-3 gap-4 pt-5">
-                {posts.map(post => (
-                    <PostCard key={post.slug} post={post} />
-                ))}
-            </div>
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={selectedCategory.path + current_page}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="grid grid-cols-3 gap-4 pt-5"
+                >
+                    {posts.map((post) => (
+                        <PostCard key={post.slug} post={post} />
+                    ))}
+                </motion.div>
+            </AnimatePresence>
             <Pagination pages={pages} current_page={current_page} category={selectedCategory.path} />
         </div>
     );
