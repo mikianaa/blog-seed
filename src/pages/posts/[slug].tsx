@@ -19,6 +19,7 @@ type PostData = {
   published_at: string;
   thumbnail: string;
   blogContentHtml: string;
+  categoryList: { path: string, label: string }[];
 };
 
 const s3 = new S3Client({
@@ -44,6 +45,14 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   const body = await streamToString(response.Body as Readable);
   const { data: frontMatter, content } = matter(body);
 
+  const catCommand = new GetObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: "public/categories.json",
+  });
+  const catRes = await s3.send(catCommand);
+  const catJson = await streamToString(catRes.Body as Readable);
+  const categoryList: { label: string; path: string }[] = JSON.parse(catJson);
+
   marked.setOptions({
     headerIds: true,
     mangle: false,
@@ -56,6 +65,7 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
       published_at: frontMatter.date,
       thumbnail: frontMatter.image,
       blogContentHtml: marked(content),
+      categoryList
     },
   };
 }
@@ -96,6 +106,7 @@ const Post = ({
   published_at,
   thumbnail,
   blogContentHtml,
+  categoryList
 }: PostData) => {
   useEffect(() => {
     tocbot.init({
@@ -135,13 +146,16 @@ const Post = ({
               </svg>
               {published_at}
             </div>
-            {categories.map((category) => (
-              <Link href={`/categories/${category}`} key={category}>
-                <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
-                  {category}
-                </span>
-              </Link>
-            ))}
+            {categories.map((category) => {
+              const label = categoryList.find(c => c.path === category)?.label ?? category;
+              return (
+                <Link href={`/categories/${category}`} key={category}>
+                  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
+                    {label}
+                  </span>
+                </Link>
+              )
+            })}
           </div>
 
           <div className="content-html prose prose-blue" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
