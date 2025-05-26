@@ -19,5 +19,26 @@
         "blogseedeb42ed36": {}
       }
     }
+  },
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-blogseed-prod-61112-authRole",
+      "UnauthRoleArn": "arn:aws:iam::218842044546:role/amplify-blogseed-prod-61112-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::218842044546:role/amplify-blogseed-prod-61112-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-blogseed-prod-61112-deployment",
+      "UnauthRoleName": "amplify-blogseed-prod-61112-unauthRole",
+      "StackName": "amplify-blogseed-prod-61112",
+      "StackId": "arn:aws:cloudformation:us-east-1:218842044546:stack/amplify-blogseed-prod-61112/4ebec780-39f2-11f0-aa0c-0affe3abed6d",
+      "AmplifyAppId": "d1gk359f4qgm5b"
+    },
+    "categories": {
+      "auth": {
+        "blogseedeb42ed36": {}
+      },
+      "storage": {
+        "mikiaSeedAmplifyStorage": {}
+      }
+    }
   }
 }
