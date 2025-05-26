@@ -1,0 +1,16 @@
+{
+  "resourceName": "s396cc7ffd",
+  "policyUUID": "96cc7ffd",
+  "bucketName": "blogseed31ed076ae2874e3094ad809496b1fd41",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "READ"
+  ],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
