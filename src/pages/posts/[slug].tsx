@@ -166,7 +166,7 @@ const Post = ({
             <nav id="toc" className="toc text-xl" />
           </div>
           <div className="p-4 mt-6">
-            <ProfileCard avatarSrc={"/seed-default.png"} name={"Mikia"} intro={"Love: Math, Techno(logy) and you all"} twitterUrl={process.env.NEXT_PUBLIC_X_URL} instagramUrl={process.env.NEXT_PUBLIC_INSTA_URL} hatenaUrl={process.env.NEXT_PUBLIC_HATENA_URL} />
+            <ProfileCard avatarSrc={"/profile.jpg"} name={"Mikia"} intro={"Love: Math, Techno(logy) and you all"} twitterUrl={process.env.NEXT_PUBLIC_X_URL} instagramUrl={process.env.NEXT_PUBLIC_INSTA_URL} hatenaUrl={process.env.NEXT_PUBLIC_HATENA_URL} />
           </div>
         </aside>
       </div>
