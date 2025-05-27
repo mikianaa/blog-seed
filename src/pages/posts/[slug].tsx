@@ -149,7 +149,7 @@ const Post = ({
             {categories.map((category) => {
               const label = categoryList.find(c => c.path === category)?.label ?? category;
               return (
-                <Link href={`/categories/${category}`} key={category}>
+                <Link href={`/categories/${category}/1`} key={category}>
                   <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
                     {label}
                   </span>
