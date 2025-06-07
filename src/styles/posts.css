@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+.content-html {
+    margin: 0 auto;
+    padding: 0;
+}
+
 .content-html h1 {
     padding-bottom: .2em;
     font-size: 1.7em;
@@ -35,9 +40,8 @@
     padding: 1rem;
     border-radius: 0.5rem;
     max-width: 100%;
-  }
-  
-  .content-html code {
+}
+
+.content-html code {
     word-break: break-word;
-  }
-  
+}

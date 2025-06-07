@@ -121,7 +121,7 @@ const Post = ({
   return (
     <div className="flex justify-center mt-10 mb-10">
       <div className="flex w-full px-4 gap-6">
-        <div className="flex-1 bg-white shadow-md rounded-xl p-6">
+        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-6">
           <h1 className="text-5xl text-center mb-6">{title}</h1>
           <div className="text-center mb-6">
             <Image
@@ -142,7 +142,7 @@ const Post = ({
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
               </svg>
               {published_at}
             </div>
@@ -158,7 +158,7 @@ const Post = ({
             })}
           </div>
 
-          <div className="content-html prose prose-blue" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
+          <div className="content-html prose prose-blue max-w-none" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
         </div>
 
         <aside className="hidden md:block w-64 sticky top-32 self-start">
