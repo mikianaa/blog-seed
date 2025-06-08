@@ -109,23 +109,40 @@ const Post = ({
   categoryList
 }: PostData) => {
   useEffect(() => {
-    tocbot.init({
-      tocSelector: "#toc",
-      contentSelector: ".content-html",
-      headingSelector: "h1, h2",
-      scrollSmooth: true,
-    });
-    return () => tocbot.destroy();
+    const initTocbot = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        tocbot.init({
+          tocSelector: "#toc",
+          contentSelector: ".content-html",
+          headingSelector: "h1, h2",
+          scrollSmooth: true,
+        });
+      }
+    };
+
+    initTocbot();
+
+    const handleResize = () => {
+      tocbot.destroy();
+      initTocbot();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      tocbot.destroy();
+    };
   }, []);
 
   return (
-    <div className="flex justify-center mt-10 mb-10">
-      <div className="flex w-full px-4 gap-6">
-        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-xl p-6">
-          <h1 className="text-5xl text-center mb-6">{title}</h1>
-          <div className="text-center mb-6">
+    <div className="flex justify-center mt-4 md:mt-10 mb-10">
+      <div className="flex flex-col lg:flex-row w-full px-4 gap-6 max-w-7xl">
+        <div className="flex-1 lg:max-w-4xl mx-auto bg-white shadow-md rounded-xl p-4 md:p-6">
+          <h1 className="text-2xl md:text-3xl lg:text-5xl text-center mb-4 md:mb-6">{title}</h1>
+          <div className="text-center mb-4 md:mb-6">
             <Image
-              className="block mx-auto rounded"
+              className="block mx-auto rounded w-full max-w-md md:max-w-lg"
               src={`/${thumbnail}`}
               width={500}
               height={300}
@@ -133,10 +150,10 @@ const Post = ({
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 mb-6">
-            <div className="text-gray-500 text-sm flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-4 md:mb-6">
+            <div className="text-gray-500 text-xs md:text-sm flex items-center gap-2">
               <svg
-                className="w-4 h-4"
+                className="w-3 h-3 md:w-4 md:h-4"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -150,7 +167,7 @@ const Post = ({
               const label = categoryList.find(c => c.path === category)?.label ?? category;
               return (
                 <Link href={`/categories/${category}/1`} key={category}>
-                  <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
+                  <span className="inline-block bg-blue-100 text-blue-800 text-xs md:text-sm font-medium px-2 md:px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200 transition">
                     {label}
                   </span>
                 </Link>
@@ -158,14 +175,20 @@ const Post = ({
             })}
           </div>
 
-          <div className="content-html prose prose-blue max-w-none" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
+          <div className="content-html prose prose-blue max-w-none prose-sm md:prose-base lg:prose-lg" dangerouslySetInnerHTML={{ __html: blogContentHtml }}></div>
+
+          {/* Mobile Profile - Below Content */}
+          <div className="lg:hidden mt-8">
+            <ProfileCard avatarSrc={"/profile.jpg"} name={"Mikia"} intro={"Love: Math, Techno(logy) and you all"} twitterUrl={process.env.NEXT_PUBLIC_X_URL} instagramUrl={process.env.NEXT_PUBLIC_INSTA_URL} hatenaUrl={process.env.NEXT_PUBLIC_HATENA_URL} />
+          </div>
         </div>
 
-        <aside className="hidden md:block w-64 sticky top-32 self-start">
-          <div className="p-4 shadow-md rounded-xl bg-white">
-            <nav id="toc" className="toc text-xl" />
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block lg:w-64 lg:sticky lg:top-32 lg:self-start">
+          <div className="p-3 md:p-4 shadow-md rounded-xl bg-white mb-4">
+            <nav id="toc" className="toc text-sm md:text-xl" />
           </div>
-          <div className="p-4 mt-6">
+          <div className="p-3 md:p-4 mt-6">
             <ProfileCard avatarSrc={"/profile.jpg"} name={"Mikia"} intro={"Love: Math, Techno(logy) and you all"} twitterUrl={process.env.NEXT_PUBLIC_X_URL} instagramUrl={process.env.NEXT_PUBLIC_INSTA_URL} hatenaUrl={process.env.NEXT_PUBLIC_HATENA_URL} />
           </div>
         </aside>

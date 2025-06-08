@@ -27,21 +27,48 @@
 }
 
 .content-html img {
-    width: 50%;
+    width: 100%;
+    max-width: 100%;
     height: auto;
 }
 
+@media (min-width: 768px) {
+    .content-html img {
+        width: 80%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .content-html img {
+        width: 60%;
+    }
+}
 
 .content-html pre {
     overflow-x: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
     background-color: #f9f9f9;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 0.5rem;
     max-width: 100%;
+    font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+    .content-html pre {
+        padding: 1rem;
+        font-size: 1rem;
+    }
 }
 
 .content-html code {
     word-break: break-word;
+    font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+    .content-html code {
+        font-size: 1rem;
+    }
 }

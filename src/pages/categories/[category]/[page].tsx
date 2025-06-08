@@ -145,7 +145,7 @@ const CategoryPage = ({ posts, pages, current_page, categories }: HomeProps) => 
     );
 
     return (
-        <div className="my-8">
+        <div className="my-8 px-4">
             <ScrollableTabBar
                 categories={categories}
                 selectedPath={selectedCategory.path}
@@ -158,7 +158,7 @@ const CategoryPage = ({ posts, pages, current_page, categories }: HomeProps) => 
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3 }}
-                    className="grid grid-cols-3 gap-4 pt-5"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-5"
                 >
                     {posts.map((post) => (
                         <PostCard key={post.slug} post={post} />
